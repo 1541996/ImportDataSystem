@@ -61,69 +61,6 @@ namespace ImportSystemWeb.Controllers
             return PartialView("_list", result);
         }
 
-
-
-        //[HttpPost]
-        //public IActionResult Index(IFormFile postedFile)
-        //{
-        //    if (postedFile != null)
-        //    {
-        //        string path = Path.Combine(this.Environment.WebRootPath, "Uploads");
-        //        if (!Directory.Exists(path))
-        //        {
-        //            Directory.CreateDirectory(path);
-        //        }
-
-        //        string fileName = Path.GetFileName(postedFile.FileName);
-        //        string filePath = Path.Combine(path, fileName);
-        //        using (FileStream stream = new FileStream(filePath, FileMode.Create))
-        //        {
-        //            postedFile.CopyTo(stream);
-        //        }
-        //        string csvData = System.IO.File.ReadAllText(filePath);
-        //        //  DataTable dt = new DataTable();
-        //        bool firstRow = true;
-        //        //bool 
-
-
-
-        //        foreach (string row in csvData.Split('\n'))
-        //        {
-
-        //            if (!string.IsNullOrEmpty(row))
-        //            {
-        //                if (firstRow)
-        //                {
-        //                    foreach (string cell in row.Split(','))
-        //                    {
-        //                        // dt.Columns.Add(cell.Trim());
-        //                    }
-        //                    firstRow = false;
-        //                }
-        //                else
-        //                {
-        //                    // dt.Rows.Add();
-        //                    int i = 0;
-        //                    foreach (string cell in row.Split(','))
-        //                    {
-        //                        if (cell.Length >= 50)
-        //                        {
-
-        //                        }
-        //                        i++;
-        //                    }
-        //                }
-        //            }
-
-        //        }
-
-        //        return View();
-        //    }
-
-        //    return View();
-        //}
-
-
         [HttpPost]
         public async Task<IActionResult> Upload(IFormFile postedFile)
         {
