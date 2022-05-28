@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -41,5 +42,28 @@ namespace ImportSystemAPI.Controllers
             return Ok(result);
         }
 
+        [Route("listbycurrency")]
+        [HttpGet]
+        public IActionResult listbycurrency([Required] string Currency)
+        {
+            var result = this.iTransaction.GetListWithoutPaging(Currency);
+            return Ok(result);
+        }
+
+        [Route("listbydaterange")]
+        [HttpGet]
+        public IActionResult listbycurrency([Required] DateTime FromDate, [Required] DateTime ToDate)
+        {
+            var result = this.iTransaction.GetListWithoutPaging(FromDate: FromDate,ToDate: ToDate);
+            return Ok(result);
+        }
+
+        [Route("listbystatus")]
+        [HttpGet]
+        public IActionResult listbystatus([Required] string Status)
+        {
+            var result = this.iTransaction.GetListWithoutPaging(Status: Status);
+            return Ok(result);
+        }
     }
 }

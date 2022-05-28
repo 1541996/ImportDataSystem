@@ -3,6 +3,7 @@ using Data.ViewModel;
 using Extensions;
 using Infra.Service;
 using Infra.UnitOfWork;
+using LinqKit;
 using Microsoft.AspNetCore.Http;
 using System;
 using System.Collections.Generic;
@@ -15,12 +16,14 @@ namespace ImportSystemAPI.Services
     {
         PagedListClient<tbTransaction> GetList(int pageSize = 10, int page = 1);
         ResponseViewModel Save(CSVRequestModel objs);
+        List<TransactionViewModel> GetListWithoutPaging(string Currency = null, DateTime? FromDate = null, DateTime? ToDate = null, string Status = null);
 
     }
     public abstract class Transaction : ITransaction
     {      
         public abstract PagedListClient<tbTransaction> GetList(int pageSize = 10, int page = 1);
         public abstract ResponseViewModel Save(CSVRequestModel objs);
+        public abstract List<TransactionViewModel> GetListWithoutPaging(string Currency = null, DateTime? FromDate = null, DateTime? ToDate = null, string Status = null);
     }
 
     public class TransactionBase : Transaction
@@ -40,6 +43,48 @@ namespace ImportSystemAPI.Services
             PagedListClient<tbTransaction> model = PagingService<tbTransaction>.Convert(page, pageSize, result);
 
             return model;
+        }
+
+        public override List<TransactionViewModel> GetListWithoutPaging(string Currency = null, DateTime? FromDate = null, DateTime? ToDate = null, string Status = null)
+        {
+            Expression<Func<tbTransaction, bool>> CurrencyFilter, DateFilter, StatusFilter = null;
+
+            var objs = uow.transactionRepo.GetAll();
+
+            if (Currency != null)
+            {
+                CurrencyFilter = x => x.CurrencyCode == Currency;
+                objs = objs.Where(CurrencyFilter);
+            }
+
+            if(FromDate != null && ToDate != null)
+            {
+                ToDate = ToDate.Value.AddDays(1);
+                DateFilter = x => x.TransactionDate >= FromDate && x.TransactionDate < ToDate;
+                objs = objs.Where(DateFilter);
+            }
+
+            if(Status != null)
+            {
+                var csvstatus = FixedData.GetStatus(Status, ".csv");
+                var xmlstatus = FixedData.GetStatus(Status, ".xml");
+                csvstatus = csvstatus != "" ? csvstatus : Status;
+                xmlstatus = xmlstatus != "" ? xmlstatus : Status;
+                StatusFilter = PredicateBuilder.New<tbTransaction>();
+                StatusFilter = StatusFilter.Or(l => l.Status.ToLower() == csvstatus.ToLower());
+                StatusFilter = StatusFilter.Or(l => l.Status.ToLower() == xmlstatus.ToLower());             
+                objs = objs.Where(StatusFilter);
+            }
+
+            var result = (from transaction in objs.OrderByDescending(a => a.AccessTime)
+                          select new TransactionViewModel
+                          {
+                              id = transaction.TransactionIdentificator,
+                              payment = transaction.Amount + " " + transaction.CurrencyCode,
+                              Status = transaction.Status
+                          }).ToList();
+
+            return result;
         }
 
 

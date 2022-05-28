@@ -29,4 +29,11 @@ namespace Data.ViewModel
         public string ReturnMessage { get; set; }
         public List<string> AdditionalDatas { get; set; }
     }
+
+    public class TransactionViewModel
+    {
+        public string id { get; set; }
+        public string payment { get; set; }
+        public string Status { get; set; }
+    }
 }
