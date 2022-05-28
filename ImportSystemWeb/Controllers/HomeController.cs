@@ -24,8 +24,10 @@ namespace ImportSystemWeb.Controllers
     public class HomeController : Controller
     {
         private readonly ILogger<HomeController> _logger;
+        [Obsolete]
         private IHostingEnvironment Environment;
-       
+
+        [Obsolete]
         public HomeController(ILogger<HomeController> logger, IHostingEnvironment _environment)
         {
             _logger = logger;
@@ -62,6 +64,7 @@ namespace ImportSystemWeb.Controllers
         }
 
         [HttpPost]
+        [Obsolete]
         public async Task<IActionResult> Upload(IFormFile postedFile)
         {
             var fileextension = "";
@@ -293,7 +296,7 @@ namespace ImportSystemWeb.Controllers
 
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         IsSave = false;
                         res = new ResponseViewModel()
@@ -338,7 +341,7 @@ namespace ImportSystemWeb.Controllers
                     var result = await TransactionApiRequestHelper.Save(model);
                     return Ok(result);
                 }
-                else
+                else if(resList.Count() > 0)
                 {
                     res = new ResponseViewModel()
                     {

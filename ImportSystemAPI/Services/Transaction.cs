@@ -63,7 +63,7 @@ namespace ImportSystemAPI.Services
                             obj.TransactionDate = item.TransactionDate != null ? DateTime.ParseExact(item.TransactionDate, "dd/MM/yyyy hh:mm:ss", null) : null;
                             obj.Status = FixedData.GetStatus(item.Status, objs.FileExtension);
                             obj.AccessTime = MyExtension.GetLocalTime(DateTime.UtcNow);
-                            obj.FileExtension = obj.FileExtension;
+                            obj.FileExtension = objs.FileExtension;
                             obj = uow.transactionRepo.InsertReturn(obj);
                         }                     
                     }

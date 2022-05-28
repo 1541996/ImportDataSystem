@@ -115,19 +115,6 @@ namespace Extensions
 
         public static bool CheckXMLDateFormatValid(string date)
         {
-            //DateTime d;
-
-            //bool chValidity = DateTime.TryParseExact(
-            //date,
-            //"yyyy/MM/dd hh:mm:ss",
-            //CultureInfo.InvariantCulture,
-            //DateTimeStyles.None,
-            //out d);
-
-            //var data = d;
-            // return chValidity;
-
-
             var data = Regex.IsMatch(date, @"^([0-9]{4})-([0-1][0-9])-([0-3][0-9])\s([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])$");
             return data;
            
@@ -135,7 +122,7 @@ namespace Extensions
 
         
 
-        public static string GetInvalidMessage(string record, string field)
+        public static string GetInvalidMessage(string field, string record)
         {
             var message = $"Invalid record '{field}' at no. {record}";
             return message;

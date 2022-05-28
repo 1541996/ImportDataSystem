@@ -56,16 +56,19 @@ namespace Data.ViewModel
                 new Status
                 {
                    Name = "Approved",
+                   XMLName = "Approved",
                    Abbr = "A"
                 },
                 new Status
                 {
                    Name = "Failed",
+                   XMLName = "Rejected",
                    Abbr = "R"
                 },
                 new Status
                 {
                    Name = "Finished",
+                   XMLName = "Done",
                    Abbr = "D"
                 },
 
