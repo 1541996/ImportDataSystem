@@ -91,92 +91,109 @@ namespace ImportSystemWeb.Controllers
             if (fileextension == ".csv")
             {
                 #region csv import
-                using (var reader = new StreamReader(filePath))
-                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
+
+                try
                 {
-                    var records = csv.GetRecords<CSVViewModel>();
-                    records = records.ToList();
-                    if (records.Count() > 0)
+                    using (var reader = new StreamReader(filePath))
+                    using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
                     {
-                        foreach (var record in records)
+
+                        var records = csv.GetRecords<CSVViewModel>();
+                        records = records.ToList();
+                        if (records.Count() > 0)
                         {
-                            saveDataList.Add(record);
-
-                            if (record.TransactionIdentificator != null)
+                            foreach (var record in records)
                             {
-                                var CheckTextLength = MyExtension.CheckTextGreaterThanLength(50, record.TransactionIdentificator);
-                                if (CheckTextLength)
+                                saveDataList.Add(record);
+
+                                if (record.TransactionIdentificator != null)
                                 {
-                                    var ReturnMessage = MyExtension.GetInvalidMessage("Transaction Identificator", record.No);
-                                    IsSave = false;
-                                    resList.Add(ReturnMessage);
+                                    var CheckTextLength = MyExtension.CheckTextGreaterThanLength(50, record.TransactionIdentificator);
+                                    if (CheckTextLength)
+                                    {
+                                        var ReturnMessage = MyExtension.GetInvalidMessage("Transaction Identificator", record.No);
+                                        IsSave = false;
+                                        resList.Add(ReturnMessage);
+                                    }
+
+
+                                }
+
+                                if (record.Amount != null)
+                                {
+                                    var CheckAmountIsDecimal = MyExtension.CheckAmountIsDecimal(record.Amount);
+                                    if (!CheckAmountIsDecimal)
+                                    {
+                                        var ReturnMessage = MyExtension.GetInvalidMessage("Amount", record.No);
+                                        IsSave = false;
+                                        resList.Add(ReturnMessage);
+                                    }
+
+
+                                }
+
+                                if (record.CurrencyCode != null)
+                                {
+                                    var CheckISOFormat = MyExtension.CheckISOFormat(record.CurrencyCode);
+                                    if (!CheckISOFormat)
+                                    {
+                                        var ReturnMessage = MyExtension.GetInvalidMessage("Currency Code", record.No);
+                                        IsSave = false;
+                                        resList.Add(ReturnMessage);
+                                    }
+                                }
+
+                                if (record.TransactionDate != null)
+                                {
+                                    var chValidity = MyExtension.CheckDateFormatValid(record.TransactionDate);
+                                    if (chValidity != true)
+                                    {
+                                        var ReturnMessage = MyExtension.GetInvalidMessage("Transaction Date", record.No);
+                                        IsSave = false;
+                                        resList.Add(ReturnMessage);
+                                    }
+
                                 }
 
 
-                            }
-
-                            if (record.Amount != null)
-                            {
-                                var CheckAmountIsDecimal = MyExtension.CheckAmountIsDecimal(record.Amount);
-                                if (!CheckAmountIsDecimal)
+                                if (record.Status != null)
                                 {
-                                    var ReturnMessage = MyExtension.GetInvalidMessage("Amount", record.No);
-                                    IsSave = false;
-                                    resList.Add(ReturnMessage);
-                                }
-
-
-                            }
-
-                            if (record.CurrencyCode != null)
-                            {
-                                var CheckISOFormat = MyExtension.CheckISOFormat(record.CurrencyCode);
-                                if (!CheckISOFormat)
-                                {
-                                    var ReturnMessage = MyExtension.GetInvalidMessage("Currency Code", record.No);
-                                    IsSave = false;
-                                    resList.Add(ReturnMessage);
+                                    var statuscheck = FixedData.StatusList(record.Status, fileextension);
+                                    if (statuscheck != true)
+                                    {
+                                        var ReturnMessage = MyExtension.GetInvalidMessage("Status", record.No);
+                                        IsSave = false;
+                                        resList.Add(ReturnMessage);
+                                    }
                                 }
                             }
 
-                            if (record.TransactionDate != null)
+                        }
+                        else
+                        {
+                            IsSave = false;
+                            res = new ResponseViewModel()
                             {
-                                var chValidity = MyExtension.CheckDateFormatValid(record.TransactionDate);
-                                if (chValidity != true)
-                                {
-                                    var ReturnMessage = MyExtension.GetInvalidMessage("Transaction Date", record.No);
-                                    IsSave = false;
-                                    resList.Add(ReturnMessage);
-                                }
+                                ReturnStatus = "Fail",
+                                ReturnMessage = "No Correct Data Found.",
 
-                            }
-
-
-                            if (record.Status != null)
-                            {
-                                var statuscheck = FixedData.StatusList(record.Status, fileextension);
-                                if (statuscheck != true)
-                                {
-                                    var ReturnMessage = MyExtension.GetInvalidMessage("Status", record.No);
-                                    IsSave = false;
-                                    resList.Add(ReturnMessage);
-                                }
-                            }
+                            };
                         }
 
                     }
-                    else
-                    {
-                        IsSave = false;
-                        res = new ResponseViewModel()
-                        {
-                            ReturnStatus = "Fail",
-                            ReturnMessage = "No Correct Data Found.",
-
-                        };
-                    }
-
                 }
+                catch
+                {
+                    IsSave = false;
+                    res = new ResponseViewModel()
+                    {
+                        ReturnStatus = "Fail",
+                        ReturnMessage = "No Correct Data Found.",
+
+                    };
+                }
+
+            
 
                 #endregion
             }

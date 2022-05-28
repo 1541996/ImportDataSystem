@@ -78,12 +78,13 @@
         })
 
         $('#uploadform').submit(function (e) {
+            $('.errText').empty();
             overlayLoadingShow('jsFormLoader');
             e.preventDefault();
 
             var files = $('#file')[0].files[0];
             if (files.size > 1000000) {
-                $('#errText').text("file size cannot be bigger than 10MB");
+                $('.errText').text("file size cannot be bigger than 10MB");
                 overlayLoadingHide('jsFormLoader');
                 return false;
             }
@@ -133,7 +134,11 @@
                     confirmButtonClass: "btn btn-primary",
                     type: "error",
                     allowOutsideClick: false
-                }).catch(swal.noop)
+                }).then((result) => {
+                    if (result.value) {
+                        window.location = "/home/import";
+                    }
+                });
             } else if (data.ReturnStatus == "Bad Request") {
                 if (data.AdditionalDatas.length > 0) {
                     $('#div_content').empty().append('');

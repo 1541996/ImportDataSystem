@@ -1,0 +1,4 @@
+No,Amount,CurrencyCode,TransactionDate,Status
+1,"1,000.00",USD,20/02/2019 12:33:16,Approved
+2,"1,000.00",USD,20/02/2019 12:33:16,Failed
+3,"1,000.00",USD,20/02/2019 12:33:16,Finished
