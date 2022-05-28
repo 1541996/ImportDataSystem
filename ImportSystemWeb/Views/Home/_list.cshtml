@@ -1,0 +1,53 @@
+﻿@model Infra.Service.PagedListClient<Data.Models.tbTransaction>
+@using X.PagedList.Mvc.Core; 
+@using X.PagedList;
+
+
+@if (Model.TotalCount > 0)
+{
+    int pagesize = ViewBag.pageSize;
+    int pagestartno = ViewBag.page;
+    int count = 0;
+    count = (pagestartno - 1) * pagesize;
+
+    <table class="table">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">ID</th>
+                <th scope="col">Payment</th>
+                <th scope="col">Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model.Results)
+            {
+                count++;
+                <tr>
+                    <th scope="row">@count</th>
+                    <td>@item.TransactionIdentificator</td>
+                    <td>@item.Amount @item.CurrencyCode</td>
+                    <td>@item.Status</td>
+                </tr>
+
+            }
+
+        </tbody>
+    </table>
+    <div class="row">
+        <div class="col-md-12">
+            <div class="pagedList" style="text-align:center">
+                @Html.PagedListPager(Model.Results, page => Url.Action("List", "Home",
+                new { page }))
+            </div>
+        </div>
+    </div>
+
+}
+else
+{
+    // nodata
+    <h2 class="table-avatar">
+        <a>There is no data!!!!</a>
+    </h2>
+}

@@ -1,0 +1,205 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+
+<div class="overlay" id="jsFormLoader" style="display:none">
+    <div class="loading text-center">
+
+        <div class="mt-5">
+            <span class="h5 text-white">Loading. Please wait...</span>
+        </div>
+
+    </div>
+</div>
+
+<div class="modal fade stati" id="errLogModal" data-backdrop="static" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">Import Fail</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="div_content">
+
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="panel-custom-default mt-3">
+    <form asp-controller="Home" asp-action="Index" method="post" id="uploadform" enctype="multipart/form-data">
+
+        <div class="d-flex">
+            <input type="file" name="postedFile" id="file" class="form-control" />
+        </div>
+        <div class="d-flex justify-content-end mt-3">
+            <button class="btn btn-primary rounded" type="submit" id="btn_upload">Upload</button>
+        </div>
+      
+        <div class="errText text-danger"></div>
+
+    </form>
+</div>
+
+
+
+<div id="div_list" class="mt-5">
+
+</div>
+
+
+@section scripts{
+
+    <script>
+
+        var page = 1;
+        var pageSize = 10;
+
+        $(function () {
+            mainlist();
+            initPaging();
+        })
+
+        $('#uploadform').submit(function (e) {
+            overlayLoadingShow('jsFormLoader');
+            e.preventDefault();
+
+            var files = $('#file')[0].files[0];
+            if (files.size > 1000000) {
+                $('#errText').text("file size cannot be bigger than 10MB");
+                overlayLoadingHide('jsFormLoader');
+                return false;
+            }
+          
+            var formData = new FormData();
+
+            formData.append("postedFile", files);
+            $.ajax(
+                {
+                    url: "/home/upload",
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    type: "POST",
+                    success: function (data) {
+                        console.log(data);
+                        showMessage(data);
+                        overlayLoadingHide('jsFormLoader');
+                    }
+                }
+            );
+        });
+
+
+
+        function showMessage(data) {
+
+            if (data.ReturnStatus == "200") {
+                swal({
+                    title: data.ReturnMessage,
+                    text: "",
+                    buttonsStyling: false,
+                    confirmButtonClass: "btn btn-primary",
+                    type: "success"
+                }).then((result) => {
+                    if (result.value) {
+                        window.location = "/home/import";
+                    }
+                });
+            }
+            else if (data.ReturnStatus == "Fail") {
+                swal({
+                    title: data.ReturnMessage,
+                    text: "",
+                    buttonsStyling: false,
+                    confirmButtonClass: "btn btn-primary",
+                    type: "error"
+                }).catch(swal.noop)
+            } else if (data.ReturnStatus == "Bad Request") {
+                if (data.AdditionalDatas.length > 0) {
+                    $('#div_content').empty().append('');
+                    for (var i = 0; i < data.AdditionalDatas.length; i++) {
+                        $('#div_content').append(`<div class="row"><div class="col-md-12">
+                                                        <p class="text-danger">${data.AdditionalDatas[i]}</p>
+                                                     </div></div>`)
+                    }
+                }
+
+                $('#errLogModal').modal('show');
+
+                mainlist();
+            }
+        }
+
+
+        function loading(ID) {
+            $('#' + ID).empty().append('<div class="text-center" style="height:400px;margin-top:100px"><div class="lds-ellipsis"><div></div><div></div><div></div><div></div></div></div>')
+        }
+
+        function overlayLoadingShow(ID) {
+            $('#' + ID).show();
+        }
+
+
+        function overlayLoadingHide(ID) {
+            $('#' + ID).hide();
+        }
+
+
+        function mainlist() {
+            $.ajax({
+                cache: false,
+                url: '/home/list',
+                data: {
+                    page: page,
+                    pageSize: pageSize,
+
+                },
+                beforeSend: function () {
+                    loading('div_list');
+                },
+                success: function (result) {
+                    // console.log(result);
+                    $('#div_list').empty().append(result);
+                },
+                complete: function () {
+
+                }
+            });
+        }
+
+
+        function initPaging() {
+            $("#div_list").on("click", ".pagedList a", function (e) {
+                e.preventDefault();
+                var $a = $(this).attr("href");
+                try {
+                    var pageurl = $a.split(/=/);
+                    page = pageurl[1];
+                    if (page == null) {
+                        page = 1;
+                    }
+                }
+                catch (e) {
+                    page = 1;
+                }
+                mainlist();
+            });
+        }
+
+
+
+
+    </script>
+
+
+
+}
