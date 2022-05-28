@@ -380,6 +380,16 @@ namespace ImportSystemWeb.Controllers
                 }
                 #endregion
             }
+            else
+            {
+                IsSave = false;
+                res = new ResponseViewModel()
+                {
+                    ReturnStatus = "Fail",
+                    ReturnMessage = "Unknown format.",
+
+                };
+            }
 
             #region data save
                 if (IsSave)
