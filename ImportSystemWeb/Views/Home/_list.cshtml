@@ -10,6 +10,19 @@
     int count = 0;
     count = (pagestartno - 1) * pagesize;
 
+    <div class="d-flex">
+        @if (Model.TotalCount == 1)
+        {
+            <h5>@Model.TotalCount transaction found</h5>
+
+        }
+        else
+        {
+            <h5>@Model.TotalCount transactions found</h5>
+        }
+
+    </div>
+
     <table class="table">
         <thead class="thead-light">
             <tr>
