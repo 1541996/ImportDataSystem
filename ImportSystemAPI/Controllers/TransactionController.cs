@@ -28,9 +28,9 @@ namespace ImportSystemAPI.Controllers
 
         [Route("list")]
         [HttpGet]
-        public IActionResult GetList(int page = 1, int pageSize = 10)
+        public IActionResult GetList(int page = 1, int pageSize = 10, string currency = null, DateTime? fromdate = null, DateTime? todate = null, string status = null)
         {
-            var result = this.iTransaction.GetList(pageSize, page);
+            var result = this.iTransaction.GetList(pageSize, page, currency, fromdate, todate, status);
             return Ok(result);
         }
 

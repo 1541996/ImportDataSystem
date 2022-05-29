@@ -55,9 +55,9 @@ namespace ImportSystemWeb.Controllers
             return View();
         }
 
-        public async Task<ActionResult> List(int pageSize = 10, int page = 1)
+        public async Task<ActionResult> List(int pageSize = 10, int page = 1, string currency = null, DateTime? fromdate = null, DateTime? todate = null, string status = null)
         {
-            PagedListClient<tbTransaction> result = await TransactionApiRequestHelper.List(pageSize, page);
+            PagedListClient<tbTransaction> result = await TransactionApiRequestHelper.List(pageSize, page, currency, fromdate, todate, status);
             ViewBag.page = page;
             ViewBag.pageSize = pageSize;
             return PartialView("_list", result);
@@ -88,7 +88,7 @@ namespace ImportSystemWeb.Controllers
             }
             string csvData = System.IO.File.ReadAllText(filePath);
 
-            if (fileextension == ".csv")
+            if (fileextension == SettingConfig.CSVExtension)
             {
                 #region csv import
 
@@ -174,8 +174,8 @@ namespace ImportSystemWeb.Controllers
                             IsSave = false;
                             res = new ResponseViewModel()
                             {
-                                ReturnStatus = "Fail",
-                                ReturnMessage = "No Correct Data Found.",
+                                ReturnStatus = SettingConfig.FailErrorCode,
+                                ReturnMessage = SettingConfig.NoDataMessage,
 
                             };
                         }
@@ -187,8 +187,8 @@ namespace ImportSystemWeb.Controllers
                     IsSave = false;
                     res = new ResponseViewModel()
                     {
-                        ReturnStatus = "Fail",
-                        ReturnMessage = "No Correct Data Found.",
+                        ReturnStatus = SettingConfig.FailErrorCode,
+                        ReturnMessage = SettingConfig.NoDataMessage,
 
                     };
                 }
@@ -197,7 +197,7 @@ namespace ImportSystemWeb.Controllers
 
                 #endregion
             }
-            else if (fileextension == ".xml")
+            else if (fileextension == SettingConfig.XMLExtension)
             {
                 #region xml import
                 if (postedFile.ContentType.Equals("application/xml") || postedFile.ContentType.Equals("text/xml"))
@@ -305,8 +305,8 @@ namespace ImportSystemWeb.Controllers
                                 IsSave = false;
                                 res = new ResponseViewModel()
                                 {
-                                    ReturnStatus = "Fail",
-                                    ReturnMessage = "No Correct Data Found.",
+                                    ReturnStatus = SettingConfig.FailErrorCode,
+                                    ReturnMessage = SettingConfig.NoDataMessage,
 
                                 };
                             }
@@ -318,8 +318,8 @@ namespace ImportSystemWeb.Controllers
                         IsSave = false;
                         res = new ResponseViewModel()
                         {
-                            ReturnStatus = "Fail",
-                            ReturnMessage = "XML Converting Fail",
+                            ReturnStatus = SettingConfig.FailErrorCode,
+                            ReturnMessage = SettingConfig.XMLFail,
 
                         };
                     }
@@ -329,8 +329,8 @@ namespace ImportSystemWeb.Controllers
                     IsSave = false;
                     res = new ResponseViewModel()
                     {
-                        ReturnStatus = "Fail",
-                        ReturnMessage = "Please upload xml or csv files.",
+                        ReturnStatus = SettingConfig.FailErrorCode,
+                        ReturnMessage = SettingConfig.UnknownFormat,
 
                     };
                 }
@@ -341,8 +341,8 @@ namespace ImportSystemWeb.Controllers
                 IsSave = false;
                 res = new ResponseViewModel()
                 {
-                    ReturnStatus = "Fail",
-                    ReturnMessage = "Unknown format.",
+                    ReturnStatus = SettingConfig.FailErrorCode,
+                    ReturnMessage = SettingConfig.UnknownFormat,
 
                 };
             }
@@ -362,7 +362,7 @@ namespace ImportSystemWeb.Controllers
                 {
                     res = new ResponseViewModel()
                     {
-                        ReturnStatus = "Bad Request",
+                        ReturnStatus = SettingConfig.BadErrorCode,
                         ReturnMessage = "",
                         AdditionalDatas = resList,
                     };

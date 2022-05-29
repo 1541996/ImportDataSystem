@@ -14,14 +14,14 @@ namespace ImportSystemAPI.Services
 {
     public interface ITransaction
     {
-        PagedListClient<tbTransaction> GetList(int pageSize = 10, int page = 1);
+        PagedListClient<tbTransaction> GetList(int pageSize = 10, int page = 1, string currency = null, DateTime? fromdate = null, DateTime? todate = null, string status = null);
         ResponseViewModel Save(CSVRequestModel objs);
         List<TransactionViewModel> GetListWithoutPaging(string Currency = null, DateTime? FromDate = null, DateTime? ToDate = null, string Status = null);
 
     }
     public abstract class Transaction : ITransaction
     {      
-        public abstract PagedListClient<tbTransaction> GetList(int pageSize = 10, int page = 1);
+        public abstract PagedListClient<tbTransaction> GetList(int pageSize = 10, int page = 1, string currency = null, DateTime? fromdate = null, DateTime? todate = null, string status = null);
         public abstract ResponseViewModel Save(CSVRequestModel objs);
         public abstract List<TransactionViewModel> GetListWithoutPaging(string Currency = null, DateTime? FromDate = null, DateTime? ToDate = null, string Status = null);
     }
@@ -36,9 +36,38 @@ namespace ImportSystemAPI.Services
           
         }
 
-        public override PagedListClient<tbTransaction> GetList(int pageSize = 10, int page = 1)
+        public override PagedListClient<tbTransaction> GetList(int pageSize = 10, int page = 1, string Currency = null, DateTime? FromDate = null, DateTime? ToDate = null, string Status = null)
         {
-            var objs = uow.transactionRepo.GetAll().OrderByDescending(a => a.AccessTime);    
+            Expression<Func<tbTransaction, bool>> CurrencyFilter, DateFilter, StatusFilter = null;
+
+            var objs = uow.transactionRepo.GetAll();
+
+            if (Currency != null)
+            {
+                CurrencyFilter = x => x.CurrencyCode == Currency;
+                objs = objs.Where(CurrencyFilter);
+            }
+
+            if (FromDate != null && ToDate != null)
+            {
+                ToDate = ToDate.Value.AddDays(1);
+                DateFilter = x => x.TransactionDate >= FromDate && x.TransactionDate < ToDate;
+                objs = objs.Where(DateFilter);
+            }
+
+            if (Status != null)
+            {
+                var csvstatus = FixedData.GetStatus(Status, SettingConfig.CSVExtension);
+                var xmlstatus = FixedData.GetStatus(Status, SettingConfig.XMLExtension);
+                csvstatus = csvstatus != "" ? csvstatus : Status;
+                xmlstatus = xmlstatus != "" ? xmlstatus : Status;
+                StatusFilter = PredicateBuilder.New<tbTransaction>();
+                StatusFilter = StatusFilter.Or(l => l.Status.ToLower() == csvstatus.ToLower());
+                StatusFilter = StatusFilter.Or(l => l.Status.ToLower() == xmlstatus.ToLower());
+                objs = objs.Where(StatusFilter);
+            }
+
+            objs = objs.OrderByDescending(a => a.AccessTime);
             var result = PagingService<tbTransaction>.getPaging(page, pageSize, objs);
             PagedListClient<tbTransaction> model = PagingService<tbTransaction>.Convert(page, pageSize, result);
 
@@ -66,8 +95,8 @@ namespace ImportSystemAPI.Services
 
             if(Status != null)
             {
-                var csvstatus = FixedData.GetStatus(Status, ".csv");
-                var xmlstatus = FixedData.GetStatus(Status, ".xml");
+                var csvstatus = FixedData.GetStatus(Status, SettingConfig.CSVExtension);
+                var xmlstatus = FixedData.GetStatus(Status, SettingConfig.XMLExtension);
                 csvstatus = csvstatus != "" ? csvstatus : Status;
                 xmlstatus = xmlstatus != "" ? xmlstatus : Status;
                 StatusFilter = PredicateBuilder.New<tbTransaction>();
@@ -114,8 +143,8 @@ namespace ImportSystemAPI.Services
                     }
                     res = new ResponseViewModel()
                     {
-                        ReturnMessage = "Data imported successfully.",
-                        ReturnStatus = "200"
+                        ReturnMessage = SettingConfig.SuccessMessage,
+                        ReturnStatus = SettingConfig.SuccessErrorCode
                     };
                 }
                 catch(Exception ex)
@@ -123,7 +152,7 @@ namespace ImportSystemAPI.Services
                     res = new ResponseViewModel()
                     {
                         ReturnMessage = ex.Message,
-                        ReturnStatus = "Fail"
+                        ReturnStatus = SettingConfig.FailErrorCode
                     };
                 }
               
@@ -132,8 +161,8 @@ namespace ImportSystemAPI.Services
             {
                 res = new ResponseViewModel()
                 {
-                    ReturnMessage = "No Data Found",
-                    ReturnStatus = "Fail"
+                    ReturnMessage = SettingConfig.NoDataMessage,
+                    ReturnStatus = SettingConfig.FailErrorCode
                 };
             }
 

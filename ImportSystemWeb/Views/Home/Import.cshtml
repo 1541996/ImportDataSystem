@@ -38,21 +38,29 @@
 
 <div class="text-left">
     <h4>Import Data System</h4>
-   
+
 </div>
+
 
 <div class="panel-custom-default mt-3">
     <form asp-controller="Home" asp-action="Index" method="post" id="uploadform" enctype="multipart/form-data">
         <div class="d-flex">
             <h5>Please upload file (csv, xml)</h5>
         </div>
-        <div class="d-flex">
-            <input type="file" name="postedFile" accept=".csv, .xml" id="file" class="form-control" required />
-        </div>
-        <div class="d-flex justify-content-end mt-3">
-            <button class="btn btn-primary rounded" type="submit" id="btn_upload">Upload</button>
-        </div>
+        <div class="row">
+            <div class="col-md-10">
+                <div class="d-flex">
+                    <input type="file" name="postedFile" accept=".csv, .xml" id="file" class="form-control" required />
+                </div>
+            </div>
+            <div class="col-md-2">
+                <div class="d-flex justify-content-end">
+                    <button class="btn btn-primary rounded btn-block" type="submit" id="btn_upload">Upload</button>
+                </div>
 
+            </div>
+        </div>
+           
         <div class="errText text-danger"></div>
 
     </form>
@@ -60,22 +68,107 @@
 
 
 
-<div id="div_list" class="mt-3">
+<div class="row mt-3">
+    <div class="col-md-4">
+        <label>Transaction Date</label>
+        <input class="form-control daterange-single" type="text" placeholder="All" id="datetime">
+    </div>
+    <div class="col-md-3">
+        <label>Currency</label>
+        <input class="form-control" type="text" placeholder="USD, EUR ..." id="searchbox">
+    </div>
+    <div class="col-md-3">
+        <div class="form-group">
+            <label>Status</label>
+            <select class="form-control" name="status" id="dd-status">
+                <option value="" selected>All</option>
+                <option value="A">Approved</option>
+                <option value="R">Rejected</option>
+                <option value="D">Done</option>
+
+            </select>
+        </div>
+    </div>
+
+    <div class="col-md-2 mt-30">
+      
+         <button class="btn btn-info rounded btn-block" onclick="location.reload()" type="button">Clear Filter</button>
+     
+    </div>
+
+</div>
+
+<div id="div_list" class="mt-2">
 
 </div>
 
 
 @section scripts{
+    <script src="~/lib/daterangepicker/moment.min.js"></script>
+    <link href="~/lib/daterangepicker/daterangepicker.css" rel="stylesheet" />
+    <script src="~/lib/daterangepicker/daterangepicker.min.js"></script>
 
     <script>
 
         var page = 1;
-        var pageSize = 10;
+        var pageSize = 8;
+        var currency;
+        var fromdate;
+        var todate;
+        var status;
 
         $(function () {
             mainlist();
             initPaging();
+            initComponents();
         })
+
+
+        function initComponents() {
+
+         
+
+            let input = document.getElementById('searchbox');
+            let timeout = null;
+            input.addEventListener('keyup', function (e) {
+                clearTimeout(timeout);
+                timeout = setTimeout(function () {
+                    Search();
+                }, 500);
+            });
+
+
+            $('#dd-status').on('change', function () {
+                status = $('#dd-status :selected').val();
+                Search();
+            });
+
+            $('#datetime').daterangepicker({
+               // opens: 'left',
+                autoUpdateInput: false,
+            });
+
+
+            $('#datetime').on('apply.daterangepicker', function (ev, picker) {
+                fromdate = picker.startDate.format('YYYY-MM-DD');
+                todate = picker.endDate.format('YYYY-MM-DD');
+                $('#datetime').val(picker.startDate.format('DD-MM-YYYY') + ' - ' + picker.endDate.format('DD-MM-YYYY'));
+                Search();
+
+            });
+
+
+
+        }
+
+
+        function Search() {
+            currency = $('#searchbox').val();
+            page = 1;
+            mainlist()
+        }
+
+
 
         $('#uploadform').submit(function (e) {
             $('.errText').empty();
@@ -144,8 +237,8 @@
                     $('#div_content').empty().append('');
                     for (var i = 0; i < data.AdditionalDatas.length; i++) {
                         $('#div_content').append(`<div class="row"><div class="col-md-12">
-                                                            <p class="text-danger">${data.AdditionalDatas[i]}</p>
-                                                         </div></div>`)
+                                                                    <p class="text-danger">${data.AdditionalDatas[i]}</p>
+                                                                 </div></div>`)
                     }
                 }
 
@@ -177,7 +270,10 @@
                 data: {
                     page: page,
                     pageSize: pageSize,
-
+                    currency: currency,
+                    fromdate: fromdate,
+                    todate: todate,
+                    status: status
                 },
                 beforeSend: function () {
                     loading('div_list');

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Extensions;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -37,11 +38,11 @@ namespace Data.ViewModel
                 
            };
 
-            if(extension == ".csv")
+            if(extension == SettingConfig.CSVExtension)
             {
                 check = pmblist.Where(a => a.Name == status).Any();             
             }
-            else if(extension == ".xml")
+            else if(extension == SettingConfig.XMLExtension)
             {
                 check = pmblist.Where(a => a.XMLName == status).Any();              
             }
@@ -73,7 +74,7 @@ namespace Data.ViewModel
                 },
 
            };
-            if (extension == ".csv")
+            if (extension == SettingConfig.CSVExtension)
             {
                 var check = pmblist.Where(a => a.Name == status).FirstOrDefault();
                 if (check != null)
@@ -81,7 +82,7 @@ namespace Data.ViewModel
                     unifiedStatus = check.Abbr;
                 }
             }
-            else if (extension == ".xml")
+            else if (extension == SettingConfig.XMLExtension)
             {
                 var check = pmblist.Where(a => a.XMLName == status).FirstOrDefault();
                 if (check != null)

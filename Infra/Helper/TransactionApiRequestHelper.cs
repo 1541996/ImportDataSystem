@@ -12,9 +12,9 @@ namespace Infra.Helper
 {
     public class TransactionApiRequestHelper
     {
-        public static async Task<PagedListClient<tbTransaction>> List(int pageSize = 10, int page = 1)
+        public static async Task<PagedListClient<tbTransaction>> List(int pageSize = 10, int page = 1, string currency = null, DateTime? fromdate = null, DateTime? todate = null, string status = null)
         {
-            string url = string.Format("api/transaction/list?pageSize={0}&page={1}", pageSize, page);
+            string url = string.Format("api/transaction/list?pageSize={0}&page={1}&currency={2}&fromdate={3}&todate={4}&status={5}", pageSize, page, currency, fromdate, todate, status);
             var data = await ApiRequest<PagedListServer<tbTransaction>>.GetRequest(url);
 
             var model = new PagedListClient<tbTransaction>();
